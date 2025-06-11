@@ -39,12 +39,16 @@ function Deliverable_1 () {
             Write-Host "Remote Desktop enabled.`n"
         } 
         elseif ($choice -eq '6') {
+            Write-Host "Install-WindowsFeature -Name DNS -IncludeManagementTools"
             Install-WindowsFeature -Name DNS -IncludeManagementTools
+            Write-Host "Install-WindowsFeature -Name DHCP -IncludeManagementTools"
             Install-WindowsFeature -Name DHCP -IncludeManagementTools
+            Write-Host "Install-WindowsFeature -Name FS-FileServer"
             Install-WindowsFeature -Name FS-FileServer
+            Write-Host "Install-WindowsFeature -Name GPMC"
             Install-WindowsFeature -Name GPMC
+            Write-Host "Install-WindowsFeature -Name Web-Server -IncludeManagementTools"
             Install-WindowsFeature -Name Web-Server -IncludeManagementTools
-            Write-Host "Features installed.`n"
         } 
         elseif ($choice -eq '7') {
             Get-TimeZone
@@ -181,8 +185,11 @@ function Deliverable_2 () {
             }
         } 
         elseif ($choice -eq '3') {
+            Write-Host "Get-ADDomain"
             Get-ADDomain 
+            Write-Host "Get-ADForest"
             Get-ADForest
+            Write-Host "Get-ADOrganizationalUnit -Filter *"
             Get-ADOrganizationalUnit -Filter *
 
         } 
@@ -242,10 +249,11 @@ function Deliverable_3(){
         Set-DhcpServerv4OptionValue -ScopeId 192.168.1.0 -DnsServer 192.168.1.10
         Set-DhcpServerv4OptionValue -ScopeId 192.168.1.0 -DnsDomain "Traction.local"
         Add-DhcpServerInDC -DnsName "TRACTION-SRV01.Traction.local" -IPAddress 192.168.1.10
-        Add-DhcpServerv4Reservation -ScopeId 192.168.1.0 -IPAddress 192.168.1.105 -ClientId "00-11-22-33-44-55" -Description "Alex Manuel PC"
+        Add-DhcpServerv4Reservation -ScopeId 192.168.1.0 -IPAddress  192.168.1.105 -ClientId "00-11-22-33-44-55" -Description "Alex Manuel PC"
 
     } elseif ($choice -eq '3') {
         Write-Host "Exiting"
+        break
     }
     else {
         Write-Host "Invalid choice. Please choose 1 for DNS or 2 for DHCP."
@@ -309,17 +317,21 @@ function Deliverable_4 (){
             }
 
         } elseif ($choice -eq "5") {
+            Write-Host "Get-WindowsFeature"
             Get-WindowsFeature DNS 
+            Write-Host "Get-WindowsFeature DHCP"
             Get-WindowsFeature DHCP
-
+            Write-Hosr "Get-DnsServerZone"
             Get-DnsServerZone
+            Write-Host "Get-DnsServer4Scope"
             Get-DhcpServerv4Scope
+            Write-Host "Get-DhcpServerv4Reservation -ScopeId 192.168.1.0"
             Get-DhcpServerv4Reservation -ScopeId 192.168.1.0
         } elseif ($choice -eq "6") {
             Write-Host "Exiting GPO menu."
             break
         }else {
-            Write-Host "Invalid option. Please choose between 1 and 5.`n"
+            Write-Host "Invalid option. Please choose between 1 and 5"
         }
     }
 }
@@ -435,5 +447,7 @@ if ($choice eq '1'){
     Deliverable_4
 }elseif ($choice eq '5'){
     client
-}else
+}else {
+    Write-Host "Invalid options"
+}
 }
