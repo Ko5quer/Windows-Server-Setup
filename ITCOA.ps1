@@ -1,16 +1,18 @@
 function Display_Menu1 () {
+    Write-Host "Deliverable 1"
     Write-Host "1. Change timezone"
     Write-Host "2. Assign static IP address"
     Write-Host "3. Change Server name"
     Write-Host "4. Change server to automatically download updates"
     Write-Host "5. Enable remote desktop"
     Write-Host "6. Install features"
-    Write-Host "7. Exit"
+    Write-Host "7. Proof"
+    Write-Host "8. Exit"
 }
 function Deliverable_1 () {
         while ($true) {
         Display_Menu1
-        $choice = Read-Host "Pick an option (1-7):"
+        $choice = Read-Host "Pick an option (1-8):"
 
         if ($choice -eq '1') {
             Set-TimeZone -Id "South Africa Standard Time"
@@ -45,6 +47,11 @@ function Deliverable_1 () {
             Write-Host "Features installed.`n"
         } 
         elseif ($choice -eq '7') {
+            Get-TimeZone
+            ipconfig /all
+            hostname
+            Get-WindowsFeature DNS, DHCP, FS-FileServer, GPMC, Web-Server
+        } elseif ($choice -eq '8'){
             Write-Host "Exiting script."
             break
         }
@@ -54,11 +61,7 @@ function Deliverable_1 () {
     }
 
 }
-function Display_Menu2 () {
-    Write-Host "1. Promte to domain controller and create a new forest "
-    Write-Host "2. Create Organisational units and user account"
-    Write-Host "3. Exit"
-}
+
 function OUStructure () {
     $domain = "DC=Traction,DC=local"
     $employeeOU = $null
@@ -114,7 +117,13 @@ function OUStructure () {
     }
 }
 
-
+function Display_Menu2 () {
+    Write-Host "Deliverable 4"
+    Write-Host "1. Promte to domain controller and create a new forest "
+    Write-Host "2. Create Organisational units and user account"
+    Write-Host "3. Proof"
+    Write-Host "4. Exit"
+}
 function Deliverable_2 () {
     OUStructure
     while ($true) {
@@ -172,11 +181,16 @@ function Deliverable_2 () {
             }
         } 
         elseif ($choice -eq '3') {
-            Write-Host "Exiting Deliverable_2 menu."
-            break
+            Get-ADDomain 
+            Get-ADForest
+            Get-ADOrganizationalUnit -Filter *
+
         } 
-        else {
-            Write-Host "Invalid choice, please try again.`n"
+        elseif ($choice -eq '4') {
+            Write-Host "Exiting Deliverable_2 menu."   
+        }else {
+             Write-Host "Invalid choice, please try again.`n"
+            break
         }
     }
 }
@@ -185,11 +199,13 @@ function Deliverable_2 () {
 
 
 function Display_Menu3 (){
+    Write-Host "Deliverable 3"
     Write-Host "1.Configure DNS"
     Write-Host "2.Configure DCP"
     Write-Host "3.Exit"
 }
 function Deliverable_3(){
+    while ($true){
     $choice = Read-Host "Pick an option 1-3"
 
     if ($choice -eq '1') {
@@ -228,18 +244,25 @@ function Deliverable_3(){
         Add-DhcpServerInDC -DnsName "TRACTION-SRV01.Traction.local" -IPAddress 192.168.1.10
         Add-DhcpServerv4Reservation -ScopeId 192.168.1.0 -IPAddress 192.168.1.105 -ClientId "00-11-22-33-44-55" -Description "Alex Manuel PC"
 
-    } else {
+    } elseif ($choice -eq '3') {
+        Write-Host "Exiting"
+    }
+    else {
         Write-Host "Invalid choice. Please choose 1 for DNS or 2 for DHCP."
     }
+    }
 }
+
 function Display_Menu4(){
+    Write-Host "Deliverable 4"
     Write-Host "1.Create GPO for Sales"
     Write-Host "2.Create GPO for Engineering Policy"
     Write-Host "3.Create a GPO for all users"
     Write-Host "4. Create a GPO Domain password policy "
-    Write-Host "5. Exit"
+    Write-Host "5. Proof"
+    Write-Host "6. Exit"
 }
-function Deliverable_4 {
+function Deliverable_4 (){
     while ($true) {
         Display_Menu4
         $choice = Read-Host "Enter your choice"
@@ -263,7 +286,7 @@ function Deliverable_4 {
             } else {
                 Write-Host "GPO '$gpoName' already exists."
             }
-
+ 
         } elseif ($choice -eq "3") {
             $gpoName = "All Users Policy"
             if (-not (Get-GPO -Name $gpoName -ErrorAction SilentlyContinue)) {
@@ -286,16 +309,131 @@ function Deliverable_4 {
             }
 
         } elseif ($choice -eq "5") {
+            Get-WindowsFeature DNS 
+            Get-WindowsFeature DHCP
+
+            Get-DnsServerZone
+            Get-DhcpServerv4Scope
+            Get-DhcpServerv4Reservation -ScopeId 192.168.1.0
+        } elseif ($choice -eq "6") {
             Write-Host "Exiting GPO menu."
             break
-
-        } else {
+        }else {
             Write-Host "Invalid option. Please choose between 1 and 5.`n"
         }
     }
 }
 
+function Display_Menu5(){
+    Write-Host "1. Install necessary things"
+    Write-Host "2. Create Certificate"
+    Write-Host "3. Issue Certoficate"
+    Write-Host "4. Configure Auto Enrollment"
+    Write-Host "5. Proof"
+    Write-Host "6. Exit"
+}
+
+function Deliverable_5 (){
+    while($true){
+        Display_Menu5
+        $choice = Read-Host "Pick an option (1-5)"
+        
+        if ($choice -eq '1'){
+            Install-WindowsFeature AD-Certificate -IncludeManagementTools
+            Install-AdcsCertificationAuthority `
+                -CAType EnterpriseRootCA `
+                -CACommonName "TractionSolutionsCA" `
+                -KeyLength 2048 `
+                -HashAlgorithmName SHA256 `
+                -CryptoProviderName "Microsoft Software Key Storage Provider"
+        
+        } elseif ($choice -eq '2'){
+            Start-Process certreq
+        
+        } elseif ($choice -eq '3'){
+            $inf = "[Version]`n" + `
+            "Signature=`"`$Windows NT`$`"`n" + `
+            "`n" + `
+            "[NewRequest]`n" + `
+            "Subject = `"CN=Traction.local`"`n" + `
+            "KeySpec = 1`n" + `
+            "KeyLength = 2048`n" + `
+            "Exportable = TRUE`n" + `
+            "MachineKeySet = TRUE`n" + `
+            "SMIME = FALSE`n" + `
+            "PrivateKeyArchive = FALSE`n" + `
+            "UserProtected = FALSE`n" + `
+            "UseExistingKeySet = FALSE`n" + `
+            "ProviderName = `"Microsoft RSA SChannel Cryptographic Provider`"`n" + `
+            "ProviderType = 12`n" + `
+            "RequestType = PKCS10`n" + `
+            "KeyUsage = 0xa0`n" + `
+            "`n" + `
+            "[EnhancedKeyUsageExtension]`n" + `
+            "OID=1.3.6.1.5.5.7.3.1 ; Server Authentication`n" + `
+            "`n" + `
+            "[RequestAttributes]`n" + `
+            "CertificateTemplate = WebServer"
+
+            $inf | Out-File C:\TractionDomainCert.inf -Encoding ascii
+
+            certreq -new C:\TractionDomainCert.inf C:\TractionDomainCert.req
+            certreq -submit -config "TRACTION-SRV01\TractionSolutionsCA" C:\TractionDomainCert.req C:\TractionDomainCert.cer
+            certreq -accept C:\TractionDomainCert.cer
+
+        } elseif ($choice -eq '4'){
+            $gpoName = "Certificate Auto-Enrollment Policy"
+            New-GPO -Name $gpoName -ErrorAction SilentlyContinue
+            $gpoPath = "HKLM\Software\Policies\Microsoft\Cryptography\AutoEnrollment"
+            Set-GPRegistryValue -Name $gpoName -Key $gpoPath -ValueName "AEPolicy" -Type DWord -Value 7
+            New-GPLink -Name $gpoName -Target "DC=Traction,DC=local"
+
+        } elseif ($choice -eq '5'){
+            Get-WindowsFeature AD-Certificate
+            Get-CACert
+            certuil -CAInfo
+            Get-GPO -Name "Cerificate Auto-Enrollment Policy"
+
+        } elseif ($choice -eq '6'){
+            Write-Host "Exiting"
+            break
+
+        } else {
+            Write-Host "Invalid input"
+        }
+    }
+}
+
+function client (){
+    $serverIP = "192.168.1.10"                     
+    $domainName = "Traction.local"
+    $domainUser = "Traction\\uptstri"       
+    $domainPassword = "Password1@"                 
+    Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses $serverIP
+    $secPassword = ConvertTo-SecureString $domainPassword -AsPlainText -Force
+    $cred = New-Object System.Management.Automation.PSCredential ($domainUser, $secPassword)
+}
+
+while ($true){
 Deliverable_1
 Deliverable_2
 Deliverable_3
 Deliverable_4
+Write-Host "1. Deliverable_1"
+Write-Host "2. Deliverable_2"
+Write-Host "3. Deliverable_3"
+Write-Host "4. Deliverable_4"
+Write-Host "5. Client Side options"
+$choice= Read-Host "Pick an option"
+if ($choice eq '1'){
+    Deliverable_1
+} elseif ($choice eq '2'){
+    Deliverable_2
+} elseif ($choice eq '3'){
+    Deliverable_3
+}elseif ($choice eq '4'){
+    Deliverable_4
+}elseif ($choice eq '5'){
+    client
+}else
+}
