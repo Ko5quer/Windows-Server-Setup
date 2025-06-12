@@ -1,4 +1,5 @@
 function Display_Menu1 () {
+    Write-Host "`n"
     Write-Host "Deliverable 1"
     Write-Host "1. Change timezone"
     Write-Host "2. Assign static IP address"
@@ -7,26 +8,23 @@ function Display_Menu1 () {
     Write-Host "5. Enable remote desktop"
     Write-Host "6. Install features"
     Write-Host "7. Proof"
-    Write-Host "8. Exit"
+    Write-Host "8. Exit `n"
 }
 function Deliverable_1 () {
         while ($true) {
         Display_Menu1
-        $choice = Read-Host "Pick an option (1-8):"
+        $choice = Read-Host "Pick an option (1-8)"
 
         if ($choice -eq '1') {
             Set-TimeZone -Id "South Africa Standard Time"
-            Write-Host "Timezone changed to South Africa Standard Time.`n"
         } 
         elseif ($choice -eq '2') {
             New-NetIPAddress -InterfaceAlias "Ethernet" `
                 -IPAddress "192.168.1.10" `
                 -PrefixLength 24
-            Write-Host "Static IP assigned to 192.168.1.10.`n"
         } 
         elseif ($choice -eq '3') {
             Rename-Computer -NewName "TRACTION-SVR01" -Force -PassThru
-            Write-Host "Server renamed to TRACTION-SVR01.`n"
         } 
         elseif ($choice -eq '4') {
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" `
@@ -122,17 +120,18 @@ function OUStructure () {
 }
 
 function Display_Menu2 () {
-    Write-Host "Deliverable 4"
+    Write-Host "`n"
+    Write-Host "Deliverable 2"
     Write-Host "1. Promte to domain controller and create a new forest "
     Write-Host "2. Create Organisational units and user account"
     Write-Host "3. Proof"
-    Write-Host "4. Exit"
+    Write-Host "4. Exit `n"
 }
 function Deliverable_2 () {
     OUStructure
     while ($true) {
         Display_Menu2
-        $choice = Read-Host "Pick an option (1-3):"
+        $choice = Read-Host "Pick an option (1-3)"
 
         if ($choice -eq '1') {
             Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
@@ -195,9 +194,9 @@ function Deliverable_2 () {
         } 
         elseif ($choice -eq '4') {
             Write-Host "Exiting Deliverable_2 menu."   
+            break
         }else {
              Write-Host "Invalid choice, please try again.`n"
-            break
         }
     }
 }
@@ -206,13 +205,15 @@ function Deliverable_2 () {
 
 
 function Display_Menu3 (){
+    Write-Host "`n"
     Write-Host "Deliverable 3"
     Write-Host "1.Configure DNS"
     Write-Host "2.Configure DCP"
-    Write-Host "3.Exit"
+    Write-Host "3.Exit `n"
 }
 function Deliverable_3(){
     while ($true){
+    Display_Menu3
     $choice = Read-Host "Pick an option 1-3"
 
     if ($choice -eq '1') {
@@ -262,13 +263,14 @@ function Deliverable_3(){
 }
 
 function Display_Menu4(){
+    Write-Host "`n"
     Write-Host "Deliverable 4"
     Write-Host "1.Create GPO for Sales"
     Write-Host "2.Create GPO for Engineering Policy"
     Write-Host "3.Create a GPO for all users"
     Write-Host "4. Create a GPO Domain password policy "
     Write-Host "5. Proof"
-    Write-Host "6. Exit"
+    Write-Host "6. Exit `n"
 }
 function Deliverable_4 (){
     while ($true) {
@@ -337,12 +339,13 @@ function Deliverable_4 (){
 }
 
 function Display_Menu5(){
+    Write-Host "`n"
     Write-Host "1. Install necessary things"
     Write-Host "2. Create Certificate"
     Write-Host "3. Issue Certoficate"
     Write-Host "4. Configure Auto Enrollment"
     Write-Host "5. Proof"
-    Write-Host "6. Exit"
+    Write-Host "6. Exit `n" 
 }
 
 function Deliverable_5 (){
@@ -427,26 +430,27 @@ function client (){
 }
 
 while ($true){
-Deliverable_1
-Deliverable_2
-Deliverable_3
-Deliverable_4
 Write-Host "1. Deliverable_1"
 Write-Host "2. Deliverable_2"
 Write-Host "3. Deliverable_3"
 Write-Host "4. Deliverable_4"
 Write-Host "5. Client Side options"
+Write-Host "6. Exit script `n"
 $choice= Read-Host "Pick an option"
-if ($choice eq '1'){
+if ($choice -eq '1'){
     Deliverable_1
-} elseif ($choice eq '2'){
+} elseif ($choice -eq '2'){
     Deliverable_2
-} elseif ($choice eq '3'){
+} elseif ($choice -eq '3'){
     Deliverable_3
-}elseif ($choice eq '4'){
+}elseif ($choice -eq '4'){
     Deliverable_4
-}elseif ($choice eq '5'){
+}elseif ($choice -eq '5'){
     client
+}elseif ($choice -eq '6'){
+    Write-Host "Exiting script"
+    break
+
 }else {
     Write-Host "Invalid options"
 }
