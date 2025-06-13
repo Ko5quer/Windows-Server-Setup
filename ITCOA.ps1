@@ -49,9 +49,13 @@ function Deliverable_1 () {
             Install-WindowsFeature -Name Web-Server -IncludeManagementTools
         } 
         elseif ($choice -eq '7') {
+            Write-Host "Get-Timezone"
             Get-TimeZone
+            Write-Host "ipconfig/all"
             ipconfig /all
+            Write-Host "hostname"
             hostname
+            Write-Host "Get-WindowsFeature DNS, DHCP, FS-FileServer, GPMC, Web-Server"
             Get-WindowsFeature DNS, DHCP, FS-FileServer, GPMC, Web-Server
         } elseif ($choice -eq '8'){
             Write-Host "Exiting script."
@@ -272,7 +276,7 @@ function Display_Menu4(){
     Write-Host "5. Proof"
     Write-Host "6. Exit `n"
 }
-function Deliverable_4 (){
+function Deliverable_4 () {
     while ($true) {
         Display_Menu4
         $choice = Read-Host "Enter your choice"
@@ -283,6 +287,18 @@ function Deliverable_4 (){
                 New-GPO -Name $gpoName
                 New-GPLink -Name $gpoName -Target "OU=Sales,OU=Employee,DC=Traction,DC=local"
                 Write-Host "GPO '$gpoName' created and linked to Sales OU."
+
+                # Disable USB Storage
+                Set-GPRegistryValue -Name $gpoName -Key "HKLM\SYSTEM\CurrentControlSet\Services\USBSTOR" -ValueName "Start" -Type DWord -Value 4
+
+                # Create SalesDocs shared folder (run on server with folder creation rights)
+                New-Item -Path "C:\Shares\SalesDocs" -ItemType Directory -Force
+                New-SmbShare -Name "SalesDocs" -Path "C:\Shares\SalesDocs" -FullAccess "Traction\Sales Group"
+
+                # Map folder via GPO
+                New-GPPrefRegistryValue -Name $gpoName -Action Create -Context User `
+                    -Key "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\MapNetworkDrive" `
+                    -ValueName "SalesDocs" -Type String -Value "\\traction-svr01\SalesDocs"
             } else {
                 Write-Host "GPO '$gpoName' already exists."
             }
@@ -293,16 +309,25 @@ function Deliverable_4 (){
                 New-GPO -Name $gpoName
                 New-GPLink -Name $gpoName -Target "OU=Engineering,OU=Employee,DC=Traction,DC=local"
                 Write-Host "GPO '$gpoName' created and linked to Engineering OU."
+
+                # Allow Command Prompt
+                Set-GPRegistryValue -Name $gpoName -Key "HKCU\Software\Policies\Microsoft\Windows\System" -ValueName "DisableCMD" -Type DWord -Value 0
+
+                # Enable RDP for Engineering
+                Set-GPRegistryValue -Name $gpoName -Key "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" -ValueName "fDenyTSConnections" -Type DWord -Value 0
             } else {
                 Write-Host "GPO '$gpoName' already exists."
             }
- 
+
         } elseif ($choice -eq "3") {
             $gpoName = "All Users Policy"
             if (-not (Get-GPO -Name $gpoName -ErrorAction SilentlyContinue)) {
                 New-GPO -Name $gpoName
                 New-GPLink -Name $gpoName -Target "OU=Employee,DC=Traction,DC=local"
                 Write-Host "GPO '$gpoName' created and linked to Employee OU."
+
+                # Disable Control Panel
+                Set-GPRegistryValue -Name $gpoName -Key "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -ValueName "NoControlPanel" -Type DWord -Value 1
             } else {
                 Write-Host "GPO '$gpoName' already exists."
             }
@@ -323,17 +348,18 @@ function Deliverable_4 (){
             Get-WindowsFeature DNS 
             Write-Host "Get-WindowsFeature DHCP"
             Get-WindowsFeature DHCP
-            Write-Hosr "Get-DnsServerZone"
+            Write-Host "Get-DnsServerZone"
             Get-DnsServerZone
-            Write-Host "Get-DnsServer4Scope"
+            Write-Host "Get-DhcpServerv4Scope"
             Get-DhcpServerv4Scope
             Write-Host "Get-DhcpServerv4Reservation -ScopeId 192.168.1.0"
             Get-DhcpServerv4Reservation -ScopeId 192.168.1.0
+
         } elseif ($choice -eq "6") {
             Write-Host "Exiting GPO menu."
             break
-        }else {
-            Write-Host "Invalid option. Please choose between 1 and 5"
+        } else {
+            Write-Host "Invalid option. Please choose between 1 and 6"
         }
     }
 }
