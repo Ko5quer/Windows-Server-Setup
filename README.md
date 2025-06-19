@@ -145,7 +145,3 @@ Menu includes options to create:
 * For lab use only.
 
 ---
-
-## Contact
-
-For queries or issues, please contact your instructor, system administrator, or course facilitator.
