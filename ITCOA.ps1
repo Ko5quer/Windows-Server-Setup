@@ -427,120 +427,6 @@ function Deliverable_4 () {
     }
 }
 
-# Function to display a simple menu for certificate services tasks
-function Display_Menu5(){
-    Write-Host "1. Install necessary things"
-    Write-Host "2. Create Certificate"
-    Write-Host "3. Issue Certificate"
-    Write-Host "4. Configure Auto Enrollment"
-    Write-Host "5. Proof"
-    Write-Host "6. Exit"
-}
-
-# Main function to handle Deliverable 5 actions using a menu
-function Deliverable_5 (){
-    while($true){
-        # Show the menu
-        Display_Menu5
-        $choice = Read-Host "Pick an option (1-5)"
-        
-        if ($choice -eq '1'){
-            # Install Certificate Services role and tools
-            Install-WindowsFeature AD-Certificate -IncludeManagementTools
-
-            # Install Enterprise Root CA with custom parameters
-            Install-AdcsCertificationAuthority `
-                -CAType EnterpriseRootCA `
-                -CACommonName "TractionSolutionsCA" `
-                -KeyLength 2048 `
-                -HashAlgorithmName SHA256 `
-                -CryptoProviderName "Microsoft Software Key Storage Provider"
-        
-        } elseif ($choice -eq '2'){
-            # Launch certificate request wizard manually
-            Start-Process certreq
-        
-        } elseif ($choice -eq '3'){
-            # Define contents of the certificate request (.inf) file
-            $inf = "[Version]`n" + `
-            "Signature=`"`$Windows NT`$`"`n" + `
-            "`n" + `
-            "[NewRequest]`n" + `
-            "Subject = `"CN=Traction.local`"`n" + `
-            "KeySpec = 1`n" + `
-            "KeyLength = 2048`n" + `
-            "Exportable = TRUE`n" + `
-            "MachineKeySet = TRUE`n" + `
-            "SMIME = FALSE`n" + `
-            "PrivateKeyArchive = FALSE`n" + `
-            "UserProtected = FALSE`n" + `
-            "UseExistingKeySet = FALSE`n" + `
-            "ProviderName = `"Microsoft RSA SChannel Cryptographic Provider`"`n" + `
-            "ProviderType = 12`n" + `
-            "RequestType = PKCS10`n" + `
-            "KeyUsage = 0xa0`n" + `
-            "`n" + `
-            "[EnhancedKeyUsageExtension]`n" + `
-            "OID=1.3.6.1.5.5.7.3.1 ; Server Authentication`n" + `
-            "`n" + `
-            "[RequestAttributes]`n" + `
-            "CertificateTemplate = WebServer"
-
-            # Save the INF file to disk
-            $inf | Out-File C:\TractionDomainCert.inf -Encoding ascii
-
-            # Create the certificate request file
-            certreq -new C:\TractionDomainCert.inf C:\TractionDomainCert.req
-
-            # Submit the certificate request to the CA
-            certreq -submit -config "TRACTION-SRV01\TractionSolutionsCA" C:\TractionDomainCert.req C:\TractionDomainCert.cer
-
-            # Accept and install the certificate
-            certreq -accept C:\TractionDomainCert.cer
-
-        } elseif ($choice -eq '4'){
-            # Configure Group Policy for certificate auto-enrollment
-
-            $gpoName = "Certificate Auto-Enrollment Policy"
-
-            # Create a new GPO for auto-enrollment
-            New-GPO -Name $gpoName -ErrorAction SilentlyContinue
-
-            # Define registry path for auto-enrollment settings
-            $gpoPath = "HKLM\Software\Policies\Microsoft\Cryptography\AutoEnrollment"
-
-            # Set AEPolicy = 7 to enable auto-enrollment for certificates
-            Set-GPRegistryValue -Name $gpoName -Key $gpoPath -ValueName "AEPolicy" -Type DWord -Value 7
-
-            # Link the GPO to the domain
-            New-GPLink -Name $gpoName -Target "DC=Traction,DC=local"
-
-        } elseif ($choice -eq '5'){
-            # Proof of work (check and show current configurations)
-
-            # Check if AD Certificate Services is installed
-            Get-WindowsFeature AD-Certificate
-
-            # Get the root CA certificate
-            Get-CACert
-
-            # Show information about the CA
-            certutil -CAInfo
-
-            # Show the GPO for auto-enrollment
-            Get-GPO -Name "Cerificate Auto-Enrollment Policy"
-
-        } elseif ($choice -eq '6'){
-            # Exit the loop and script
-            Write-Host "Exiting"
-            break
-
-        } else {
-            # Handle invalid input
-            Write-Host "Invalid input"
-        }
-    }
-}
 
 
 
@@ -570,7 +456,7 @@ function client (){
 
 
 # This function configures firewall rules and hardens security on the Windows Server.
-function Deliverable_6 {
+function Deliverable_5 {
     Write-Host "`n--- Deliverable 6: Windows Server Hardening and Security ---`n"
 
     # Enable Windows Firewall for Domain, Public, and Private profiles
@@ -606,17 +492,12 @@ function Deliverable_6 {
 
 
 while ($true){
-Deliverable_1
-Deliverable_2
-Deliverable_3
-Deliverable_4
 Write-Host "1. Deliverable_1"
 Write-Host "2. Deliverable_2"
 Write-Host "3. Deliverable_3"
 Write-Host "4. Deliverable_4"
 Write-Host "5. Deliverable_5"
-Write_Host "6. Deliverable_6"
-Write-Host "7. Client Side options"
+Write-Host "6. Client Side options"
 $choice= Read-Host "Pick an option"
 if ($choice -eq '1'){
     Deliverable_1
@@ -629,8 +510,6 @@ if ($choice -eq '1'){
 }elseif ($choice -eq '5'){
     Deliverable_5
 }elseif ($choice -eq '6'){
-	Deliverable_6
-}elseif ($choice -eq '7'){
 	client
 }else {
 Write-Host "Invalid"
